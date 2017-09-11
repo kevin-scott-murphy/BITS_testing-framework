@@ -1,0 +1,9 @@
+{
+  "name": "testing-framework",
+  "version": "1.0.0",
+  "main": "main.js",
+  "dependencies": {
+    "electron": "^1.7.6",
+    "jquery": "^3.2.1"
+  }
+}

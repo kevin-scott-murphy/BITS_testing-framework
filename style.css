@@ -1,0 +1,59 @@
+
+
+header {
+
+}
+
+#messages {
+	float: left;
+	width: 50%;
+}
+
+#game-state {
+	float: left;
+	width: 50%;
+}
+
+#board {
+	width: 500px;
+	height: 500px;
+}
+
+.card {
+	float: left;
+	width: 98px;
+	height: 98px;
+	margin: 1px;
+	background-color: #999999;
+	line-height: 98px;
+	text-align: center;
+}
+
+.selected {
+	width: 96px;
+	height: 96px;
+	border: 1px solid red;
+	background-color: #444444;
+	color: #ffffff;
+}
+
+#phase {
+	display: inline;
+}
+
+button {
+	display: block;
+	width: calc(100% - 30px);
+	margin: 15px;
+	padding: 10px;
+	border: 1px solid #444444;
+	background-color: #eeeeee;
+}
+
+button:hover {
+	background-color: orange;
+}
+
+button:active {
+	background-color: #ffffff;
+}
