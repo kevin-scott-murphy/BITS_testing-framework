@@ -25,7 +25,13 @@ $(document).ready(function() {
 						boardHtml += data.board[i].type;
 					}
 				}
-				boardHtml += `</div>`;
+				boardHtml += `<div class='ship'>`;
+				for(var j = 0; j < data.ships.length; j++) {
+					if(data.ships[j].x == x && data.ships[j].y == y) {
+						boardHtml += "^";					
+					}
+				}
+				boardHtml += `</div></div>`;
 			}
 		}
 
