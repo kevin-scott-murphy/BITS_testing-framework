@@ -38,8 +38,6 @@ $(document).ready(function() {
 		$("#board").html(boardHtml);
 		$("#phase").html(`Phase: ${phase}, Player: ${currentPlayer}, Score ${currentPlayerScore}, X: ${selected_x}, Y: ${selected_y}`);
 		$("#display").html(`<pre>${JSON.stringify(data, null, 4)}</pre>`);
-		$("#board-wrap").scrollTop(2075);
-		$("#board-wrap").scrollLeft(1975);
 	});
 
 	$( "#board" ).on("click", ".card", function() {
