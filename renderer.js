@@ -17,8 +17,8 @@ $(document).ready(function() {
 
 		var boardHtml = "";
 
-		for(var y = 1; y < 6; y++) {
-			for(var x = 1; x < 6; x++){
+		for(var y = 1; y < 94; y++) {
+			for(var x = 1; x < 94; x++){
 				boardHtml += `<div class="card" id="${x}-${y}">`;
 				for(var i = 0; i < data.board.length; i++) {
 					if(data.board[i].x == x && data.board[i].y == y) {
@@ -38,14 +38,16 @@ $(document).ready(function() {
 		$("#board").html(boardHtml);
 		$("#phase").html(`Phase: ${phase}, Player: ${currentPlayer}, Score ${currentPlayerScore}, X: ${selected_x}, Y: ${selected_y}`);
 		$("#display").html(`<pre>${JSON.stringify(data, null, 4)}</pre>`);
+		$("#board-wrap").scrollTop(2075);
+		$("#board-wrap").scrollLeft(1975);
 	});
 
 	$( "#board" ).on("click", ".card", function() {
 		$( ".selected" ).removeClass( "selected" );
 		$(this).addClass( "selected" );
 		var pos = $(this).attr("id");
-		var selected_x = parseInt(pos.substring(0, 1));
-		var selected_y = parseInt(pos.substring(2, 3));
+		var selected_x = parseInt(pos.substring(0, pos.indexOf("-")));
+		var selected_y = parseInt(pos.substring(pos.indexOf("-") + 1));
 		$("#phase").html(`Phase: ${phase}, Player: ${currentPlayer}, Score ${currentPlayerScore}, X: ${selected_x}, Y: ${selected_y}`);
 	});
 

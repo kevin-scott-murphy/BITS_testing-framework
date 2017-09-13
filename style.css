@@ -14,24 +14,34 @@ header {
 	width: 50%;
 }
 
-#board {
+#board-wrap {
+	position: relative;
 	width: 500px;
 	height: 500px;
+	overflow-x: scroll;
+	overflow-y: scroll;
+}
+
+#board {
+	width: 4650px;
+	height: 4650px;
 }
 
 .card {
+	position: relative;
 	float: left;
-	width: 98px;
-	height: 98px;
+	width: 48px;
+	height: 48px;
 	margin: 1px;
 	background-color: #999999;
-	line-height: 98px;
+	line-height: 48px;
 	text-align: center;
+	z-index: 1;
 }
 
 .selected {
-	width: 96px;
-	height: 96px;
+	width: 46px;
+	height: 46px;
 	border: 1px solid red;
 	background-color: #444444;
 	color: #ffffff;
@@ -56,4 +66,15 @@ button:hover {
 
 button:active {
 	background-color: #ffffff;
+}
+
+.ship {
+	position: absolute;
+	left: 2px;
+	top: 2px;
+	z-index: 2;
+	font-size: 20px;
+	font-weight: bold;
+	color: red;
+	line-height: 1em;
 }
