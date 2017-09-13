@@ -17,8 +17,8 @@ $(document).ready(function() {
 
 		var boardHtml = "";
 
-		for(var y = 1; y < 94; y++) {
-			for(var x = 1; x < 94; x++){
+		for(var y = 0; y < 9; y++) {
+			for(var x = 0; x < 9; x++){
 				boardHtml += `<div class="card" id="${x}-${y}">`;
 				for(var i = 0; i < data.board.length; i++) {
 					if(data.board[i].x == x && data.board[i].y == y) {
