@@ -7,30 +7,59 @@ var GameState = require("./GameState.js");
 
 app.on("ready", function() {
 
+	var gso = new GameState(2);
 	var appWindow = new BrowserWindow({
+
+		width: 1024,
+		height: 768,
 		show: false
 	});
 
 	appWindow.loadURL("file://" + __dirname + "/index.html");
 
 	appWindow.once("ready-to-show", function() {
-		appWindow.show();
+
 		appWindow.maximize();
-		var gso = new GameState();
+		appWindow.show();
 		appWindow.webContents.send("GSO", gso);
 	});
 
-	ipc.on('DRAW', function(event, arg) {
-		// Handle DRAW event
-		//event.sender.send("DRAW", gso);
+	ipc.on('DRAW', function(event, data) {
+
+		if(gso.drawCard(data)) {
+
+			gso.nextPhase();
+		}
+		event.sender.send("GSO", gso);
 	});
 
-	ipc.on('PLACE', function(event, arg) {
-		// Handle PLACE event
+	ipc.on('PLACE', function(event, data) {
+
+		if(gso.placeCard(data.player, data.x, data.y)) {
+			
+			gso.nextPhase();
+		}
+		event.sender.send("GSO", gso);
 	});
 
-	ipc.on('LURE', function(event, arg) {
-		// Handle LURE event
+	ipc.on('LURE', function(event, data) {
+
+		if(gso.placeLure(data.player, data.x, data.y)) {
+
+			gso.nextPhase();
+		}
+		event.sender.send("GSO", gso);
+
+		if(gso.phase == "SHIPSFLY") {
+			
+			gso.nextPhase();
+			event.sender.send("GSO", gso);
+			gso.nextPhase();
+			event.sender.send("GSO", gso);
+			gso.nextPhase();
+			event.sender.send("GSO", gso);
+		}
+		
 	});
 
 });

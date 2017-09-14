@@ -1,9 +1,3 @@
-
-
-header {
-
-}
-
 #messages {
 	float: left;
 	width: 50%;
@@ -69,8 +63,27 @@ button:active {
 	left: 2px;
 	top: 2px;
 	z-index: 2;
-	font-size: 20px;
+	font-size: 15px;
+	width: calc(100% - 4px);
+	text-align: left;
+	word-wrap: break-word;
+	height: calc(100% - 4px);
 	font-weight: bold;
 	color: red;
 	line-height: 1em;
+}
+
+.lure {
+	position: absolute;
+	right: 2px;
+	bottom: 2px;
+	z-index: 2;
+	font-size: 15px;
+	color: red;
+	line-height: 1em;
+}
+
+.detail-label {
+	width: 100px;
+	display: inline-block;
 }

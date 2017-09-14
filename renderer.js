@@ -4,9 +4,11 @@ var $ = require("jQuery");
 // globals...
 var currentPlayer = 0;
 var currentPlayerScore = 0;
+var currentPlayerCard = "";
 var selected_x = 0;
 var selected_y = 0;
 var phase = "";
+var deckCards = 0;
 
 $(document).ready(function() {
 
@@ -17,6 +19,9 @@ $(document).ready(function() {
 		currentPlayer = data.player;
 		phase = data.phase;
 		currentPlayerScore = data.players[currentPlayer].score;
+		currentPlayerCard = data.players[currentPlayer].currentCard;
+		deckCards = data.deck.length;
+
 
 		// draw the board, and update the status display
 		drawBoard(data);
@@ -89,6 +94,14 @@ function drawBoard(gameState) {
 					boardHtml += "^";					
 				}
 			}
+			boardHtml += `</div>`;
+			boardHtml += `<div class='lure'>`;
+			for(var k = 0; k < gameState.players.length; ++k) {
+
+				if(gameState.players[k].lure && gameState.players[k].lure.x == x && gameState.players[k].lure.y == y) {
+					boardHtml += `P${k}`;
+				}
+			}
 			boardHtml += `</div></div>`;
 		}
 	}
@@ -103,5 +116,13 @@ function drawBoard(gameState) {
 function updateStatusDisplay() {
 
 	// update the html
-	$("#phase").html(`Phase: ${phase}, Player: ${currentPlayer}, Score ${currentPlayerScore}, X: ${selected_x}, Y: ${selected_y}`);
+	$("#phase").html(`
+
+		<span class="detail-label">Phase:</span>			 ${phase}
+		<br/><span class="detail-label">Cards in Deck:</span>		 ${deckCards}
+		<br/><span class="detail-label">Player:</span>		 ${currentPlayer}
+		<br/><span class="detail-label">Player Card:</span>	 ${currentPlayerCard}
+		<br/><span class="detail-label">Player Score:</span> ${currentPlayerScore}
+		<br/><span class="detail-label">Position:</span>   ( ${selected_x}, ${selected_y} )`
+	);
 }
