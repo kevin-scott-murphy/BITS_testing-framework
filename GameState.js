@@ -259,10 +259,23 @@ class GameState {
 		return false;
 	}
 
+	removeShipsFromTile(x, y) {
+
+		console.log(`removing all ships from ( ${x}, ${y} )`);
+
+		for(var i = 0; i < this.ships.length; ++i) {
+
+			if(this.ships[i].x == x && this.ships[i].y == y) {
+
+				this.ships.splice(i, 1);
+				i--;
+			}
+		}
+	}
+
 	scatter() {
 		
 		var shipGroups = new Array();
-		var newShipGroups = new Array();
 		
 		for(var i = 0; i < this.board.length; ++i) {
 
@@ -278,24 +291,32 @@ class GameState {
 
 			if(shipGroups[j].num >= 6) {
 
+				this.removeShipsFromTile(shipGroups[j].x, shipGroups[j].y);
 				var shipsToScatter = shipGroups[j].num - 2;
 
-			    var direction = 0; // current direction; 0=RIGHT, 1=DOWN, 2=LEFT, 3=UP
+			    var direction = 0; // direction
 			    var size = 1; // chain size
 
 			    // starting point
 			    var x = shipGroups[j].x;
 			    var y = shipGroups[j].y;
 
-			    for (var k = 0; k < shipsToScatter; k++) {
+			    console.log(`Need to scatter ${shipsToScatter} ships`);
+
+			    for (var k = 0; k < shipsToScatter; /*condition is inside loop*/) {
 
 			        for (var l = 0; l < 2; l++) {
 
 			            for (var i = 0; i < size; i++) {
 
-			                console.log(`( ${x}, ${y} )\n`);
-			                if(cardAtTile(x, y)) {
-			                	
+			                console.log(`Checking tile ( ${x}, ${y} )\n`);
+			                if(this.cardAtTile(x, y)) {
+			                	console.log(`Scattering one ship to ( ${x}, ${y} ) - ${k + 1} ships scattered...\n`);
+			                	this.ships.push({ "x" : x, "y" : y });
+			                	k++;
+			                }
+			                else {
+			                	console.log(`No Card at tile ( ${x}, ${y} )\n`);
 			                }
 
 			                switch (direction) {
@@ -348,7 +369,7 @@ class GameState {
 
 		var shipGroups = new Array();
 		var newShipGroups = new Array();
-		
+
 		for(var i = 0; i < this.board.length; ++i) {
 
 			var shipCount = this.numShipsOnTile(this.board[i].x, this.board[i].y);
@@ -361,73 +382,97 @@ class GameState {
 
 		for(var k = 0; k < shipGroups.length; ++k) {
 
+			console.log(`\n\n==================\nShip Group ${k}\n==================`);
+			console.log(`Location: ( ${shipGroups[k].x}, ${shipGroups[k].y} )`);
+			console.log(`Number of Ships: ${shipGroups[k].num}\n==================\n`);
+			
 			var axisLures = new Array();
-			var closestLureDistance = 9;
 			var cruiserLures = new Array();
-			var numShipsPerLure = 0;
 			var pub = null;
+			var closestLureDistance = 9;
+			var numShipsPerLure = 0;
 
 			for(var j = 0; j < this.players.length; ++j) {
 
 				if(this.players[j].lure.x == shipGroups[k].x) {
 
-					axisLures.push({ "axis" : "x", "x" : this.players[j].lure.x, "y" : this.players[j].lure.y });
+					axisLures.push({ "axis" : "y", "x" : this.players[j].lure.x, "y" : this.players[j].lure.y, "distance" : 0 });
 				}
 				else if(this.players[j].lure.y == shipGroups[k].y) {
 
-					axisLures.push({ "axis" : "y", "x" : this.players[j].lure.x, "y" : this.players[j].lure.y });
+					axisLures.push({ "axis" : "x", "x" : this.players[j].lure.x, "y" : this.players[j].lure.y, "distance" : 0});
 				}
+			}
+
+			console.log(`Axis Lures\n----------\n`);
+			for(var ii = 0; ii < axisLures.length; ++ii) {
+
+				console.log(`Lure ${ii}: ${axisLures[ii].axis}-axis ( ${axisLures[ii].x}, ${axisLures[ii].y} )\n`);
 			}
 			
 			for(var l = 0; l < axisLures.length; ++l) {
-
-				if(axisLures[l].axis == "x" && !this.checkShipPathX(shipGroups[k].y, axisLures[l].y, axisLures[l].x)) {
-
-					axisLures.splice(l, 1);
-				}
-				else if(axisLures[l].axis == "y" && !this.checkShipPathY(shipGroups[k].x, axisLures[l].x, axisLures[l].y)) {
+				console.log(`Checking lure ${l}`);
+				if(axisLures[l].axis == "y" && !this.checkShipPathY(shipGroups[k].y, axisLures[l].y, axisLures[l].x)) {
 
 					axisLures.splice(l, 1);
+					l--;
 				}
+				else if(axisLures[l].axis == "x" && !this.checkShipPathX(shipGroups[k].x, axisLures[l].x, axisLures[l].y)) {
+
+					axisLures.splice(l, 1);
+					l--;
+				}
+			}
+
+			console.log(`Path Lures\n----------\n`);
+			for(var ii = 0; ii < axisLures.length; ++ii) {
+				
+				console.log(`Lure ${ii}: ${axisLures[ii].axis}-axis ( ${axisLures[ii].x}, ${axisLures[ii].y} )\n`);
 			}
 
 			for(var n = 0; n < axisLures.length; ++n) {
 
 				if(axisLures[n].axis == "x") {
 
-					if(closestLureDistance >= Math.abs(axisLures[n].y - shipGroups[k].y)) {
-
-						closestLureDistance = Math.abs(axisLures[n].y - shipGroups[k].y);
-					}
-					else {
-
-						axisLures.splice(n, 1);
-					}
+					axisLures[n].distance = Math.abs(axisLures[n].x - shipGroups[k].x);
 				}
-				else if(axisLures[n].axis == "y") {
+				else {
 
-					if(closestLureDistance >= Math.abs(axisLures[n].x - shipGroups[k].x)) {
-
-						closestLureDistance = Math.abs(axisLures[n].x - shipGroups[k].x);
-					}
-					else {
-
-						axisLures.splice(n, 1);
-					}					
+					axisLures[n].distance = Math.abs(axisLures[n].y - shipGroups[k].y);
 				}
+			}
+
+			for(var n = 0; n < axisLures.length; ++n) {
+
+				if(closestLureDistance >= axisLures[n].distance) {
+
+					closestLureDistance = axisLures[n].distance;
+				}
+				else {
+
+					axisLures.splice(n, 1);
+					n--;
+				}
+			}
+
+			console.log(`Closest Lures\n----------\n`);
+			for(var ii = 0; ii < axisLures.length; ++ii) {
+				
+				console.log(`Lure ${ii}: ${axisLures[ii].axis}-axis ( ${axisLures[ii].x}, ${axisLures[ii].y} )\n`);
 			}
 
 			if(axisLures.length == 1) {
 
 				numShipsPerLure = shipGroups[k].num;
 
-				if(axisLures[0].axis = "x") {
+				console.log(`Pubs\n----------\n`);
+				if(axisLures[0].axis == "x") {
 
-					pub = this.getPubInPathX(shipGroups[k].y, axisLures[0].y, axisLures[0].x);
+					pub = this.getPubInPathX(shipGroups[k].x, axisLures[0].x, axisLures[0].y);
 				}
 				else {
 
-					pub = this.getPubInPathY(shipGroups[k].x, axisLures[0].x, axisLures[0].y);
+					pub = this.getPubInPathY(shipGroups[k].y, axisLures[0].y, axisLures[0].x);
 				}
 				
 				if(pub != null) {
@@ -448,6 +493,13 @@ class GameState {
 						cruiserLures.push({ "axis" : axisLures[t].axis, "x" : axisLures[t].x, "y" : axisLures[t].y });
 					}
 				}
+
+				console.log(`Cruiser Lures\n----------\n`);
+				for(var ii = 0; ii < cruiserLures.length; ++ii) {
+					
+					console.log(`Lure ${ii}: ${cruiserLures[ii].axis}-axis ( ${cruiserLures[ii].x}, ${cruiserLures[ii].y} )\n`);
+				}
+
 
 				if(cruiserLures.length > 0 && shipGroups[k].num % cruiserLures.length == 0) {
 
@@ -485,7 +537,7 @@ class GameState {
 				}
 				else if(cruiserLures.length == 0 && shipGroups[k].num % axisLures.length == 0) {
 
-					numShipsPerLure = shipGroups[k].num / cruiserLures.length;
+					numShipsPerLure = shipGroups[k].num / axisLures.length;
 
 					for(var v = 0; v < axisLures.length; ++v) {
 
@@ -537,14 +589,16 @@ class GameState {
 		}
 	}
 
-	getPubInPathY(xStart, xEnd, y) {
-
+	getPubInPathX(xStart, xEnd, y) {
+		console.log(`Checking pubs in X axis...`);
 		if(xStart > xEnd) {
 
 			for(var i = xStart - 1; i > xEnd; --i) {
 
+				console.log(`Checking for pub @ ( ${i}, ${y} )\n`);
 				if(this.cardAtTile(i, y) == "pub") {
 
+					console.log(`Pub @ ( ${i}, ${y} )\n`);
 					return { "x" : i, "y" : y };
 				}
 			}
@@ -553,8 +607,10 @@ class GameState {
 
 			for(var i = xStart + 1; i < xEnd; ++i) {
 
+				console.log(`Checking for pub @ ( ${i}, ${y} )\n`);
 				if(this.cardAtTile(i, y) == "pub") {
 
+					console.log(`Pub @ ( ${i}, ${y} )\n`);
 					return { "x" : i, "y" : y };
 				}
 			}
@@ -563,14 +619,16 @@ class GameState {
 		return null;
 	}
 
-	getPubInPathX(yStart, yEnd, x) {
-
+	getPubInPathY(yStart, yEnd, x) {
+		console.log(`Checking pubs in Y axis...`);
 		if(yStart > yEnd) {
 
 			for(var i = yStart - 1; i > yEnd; --i) {
 
+				console.log(`Checking for pub @ ( ${x}, ${i} )\n`);
 				if(this.cardAtTile(x, i) == "pub") {
 
+					console.log(`Pub @ ( ${x}, ${i} )\n`);
 					return { "x" : x, "y" : i };
 				}
 			}
@@ -579,8 +637,10 @@ class GameState {
 
 			for(var i = yStart + 1; i < yEnd; ++i) {
 
+				console.log(`Checking for pub @ ( ${x}, ${i} )\n`);
 				if(this.cardAtTile(x, i) == "pub") {
 
+					console.log(`Pub @ ( ${x}, ${i} )\n`);
 					return { "x" : x, "y" : i };
 				}
 			}
@@ -590,13 +650,13 @@ class GameState {
 	}
 
 	checkShipPathX(xStart, xEnd, y) {
-
+		console.log(`Checking path in X axis...`);
 		if(xStart > xEnd) {
 
 			for(var i = xStart - 1; i > xEnd; --i) {
 
 				if(!this.cardAtTile(i, y)) {
-
+					console.log(`No card @ ( ${i}, ${y} )`);
 					return false;
 				}
 			}
@@ -606,7 +666,7 @@ class GameState {
 			for(var i = xStart + 1; i < xEnd; ++i) {
 
 				if(!this.cardAtTile(i, y)) {
-
+					console.log(`No card @ ( ${i}, ${y} )`);
 					return false;
 				}
 			}
@@ -616,13 +676,13 @@ class GameState {
 	}
 
 	checkShipPathY(yStart, yEnd, x) {
-
+		console.log(`Checking path in Y axis...`);
 		if(yStart > yEnd) {
 
 			for(var i = yStart - 1; i > yEnd; --i) {
 
 				if(!this.cardAtTile(x, i)) {
-
+					console.log(`No card @ ( ${x}, ${i} )`);
 					return false;
 				}
 			}
@@ -632,7 +692,7 @@ class GameState {
 			for(var i = yStart + 1; i < yEnd; ++i) {
 
 				if(!this.cardAtTile(x, i)) {
-
+					console.log(`No card @ ( ${x}, ${i} )`);
 					return false;
 				}
 			}
