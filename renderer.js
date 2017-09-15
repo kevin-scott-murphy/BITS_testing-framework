@@ -119,7 +119,7 @@ function updateStatusDisplay() {
 	$("#phase").html(`
 
 		<span class="detail-label">Phase:</span>			 ${phase}
-		<br/><span class="detail-label">Cards in Deck:</span>		 ${deckCards}
+		<br/><span class="detail-label">Cards in Deck:</span>${deckCards}
 		<br/><span class="detail-label">Player:</span>		 ${currentPlayer}
 		<br/><span class="detail-label">Player Card:</span>	 ${currentPlayerCard}
 		<br/><span class="detail-label">Player Score:</span> ${currentPlayerScore}
