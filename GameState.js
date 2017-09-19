@@ -410,17 +410,15 @@ class GameState {
 				console.log(`Lure ${ii}: ${axisLures[ii].axis}-axis ( ${axisLures[ii].x}, ${axisLures[ii].y} )\n`);
 			}
 			
-			for(var l = 0; l < axisLures.length; ++l) {
+			for(var l = axisLures.length - 1; l >= 0; --l) {
 				console.log(`Checking lure ${l}`);
 				if(axisLures[l].axis == "y" && !this.checkShipPathY(shipGroups[k].y, axisLures[l].y, axisLures[l].x)) {
 
 					axisLures.splice(l, 1);
-					l--;
 				}
 				else if(axisLures[l].axis == "x" && !this.checkShipPathX(shipGroups[k].x, axisLures[l].x, axisLures[l].y)) {
 
 					axisLures.splice(l, 1);
-					l--;
 				}
 			}
 
@@ -442,16 +440,14 @@ class GameState {
 				}
 			}
 
-			for(var n = 0; n < axisLures.length; ++n) {
+			closestLureDistance = Math.min.apply(Math, axisLures.map(function(o) { return o.distance; }))
+			console.log(`Closest Lure Distance: ${closestLureDistance}`);
 
-				if(closestLureDistance >= axisLures[n].distance) {
+			for(var n = axisLures.length - 1; n >= 0; --n) {
 
-					closestLureDistance = axisLures[n].distance;
-				}
-				else {
+				if(closestLureDistance < axisLures[n].distance) {
 
 					axisLures.splice(n, 1);
-					n--;
 				}
 			}
 
@@ -507,31 +503,22 @@ class GameState {
 
 					for(var v = 0; v < cruiserLures.length; ++v) {
 
-						if(cruiserLures[v].axis == "y") {
-
-							pub = this.getPubInPathY(shipGroups[k].x, cruiserLures[v].x, cruiserLures[v].y);
-
-							if(pub != null) {
-
-								newShipGroups.push({ "num" : numShipsPerLure, "x" : pub.x,  "y" : pub.y });
-							}
-							else {
-
-								newShipGroups.push({ "num" : numShipsPerLure, "x" : cruiserLures[v].x,  "y" : cruiserLures[v].y });
-							}
-						}
-						else if(cruiserLures[v].axis == "x") {
+						if(cruiserLures[v].axis == "x") {
 
 							pub = this.getPubInPathX(shipGroups[k].y, cruiserLures[v].y, cruiserLures[v].x);
+						}
+						else {
 
-							if(pub != null) {
+							pub = this.getPubInPathY(shipGroups[k].x, cruiserLures[v].x, cruiserLures[v].y);	
+						}
 
-								newShipGroups.push({ "num" : numShipsPerLure, "x" : pub.x,  "y" : pub.y });
-							}
-							else {
+						if(pub != null) {
 
-								newShipGroups.push({ "num" : numShipsPerLure, "x" : cruiserLures[v].x,  "y" : cruiserLures[v].y });
-							}
+							newShipGroups.push({ "num" : numShipsPerLure, "x" : pub.x,  "y" : pub.y });
+						}
+						else {
+
+							newShipGroups.push({ "num" : numShipsPerLure, "x" : cruiserLures[v].x,  "y" : cruiserLures[v].y });
 						}
 					}
 				}
