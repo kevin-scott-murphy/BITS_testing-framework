@@ -102,7 +102,7 @@ class GameState {
 
 	drawCard(player) {
 
-		if(this.players[player].currentCard) {
+		if(this.players[player].currentCard || this.phase != "DRAW") {
 
 			return false;
 		} 
@@ -115,7 +115,7 @@ class GameState {
 
 	placeCard(player, x, y) {
 
-		if(x > 8 || x < 0 || y > 8 || y < 0 || this.cardAtTile(x, y)) {
+		if(x > 8 || x < 0 || y > 8 || y < 0 || this.cardAtTile(x, y) || this.phase != "PLACE") {
 
 			return false;
 		}
@@ -138,7 +138,7 @@ class GameState {
 
 	placeLure(player, x, y) {
 
-		if(this.cardAtTile(x, y) && this.cardAtTile(x, y) != "pub" && this.numShipsOnTile(x, y) == 0 && !this.lureOnTile(x, y)) {
+		if(this.cardAtTile(x, y) && this.cardAtTile(x, y) != "pub" && this.numShipsOnTile(x, y) == 0 && !this.lureOnTile(x, y) && this.phase == "LURE") {
 
 			this.players[player].lure = { "x" : x, "y" : y };
 			return true;
@@ -253,6 +253,7 @@ class GameState {
 	isGameOver() {
 
 		if(this.deck.length == 0) {
+
 			return true;
 		}
 
@@ -274,7 +275,8 @@ class GameState {
 	}
 
 	scatter() {
-		
+
+		// all ships on one tile = shipGroup
 		var shipGroups = new Array();
 		
 		for(var i = 0; i < this.board.length; ++i) {
@@ -287,61 +289,128 @@ class GameState {
 			}
 		}
 
+		/*
+
+		(0,0) (1,0) (2,0) (3,0) (4,0) (5,0)
+
+		(0,1) (1,1) (2,1) (3,1) (4,1) (5,1)
+
+		(0,2) (1,2) (2,2) (3,2) (4,2) (5,2)
+
+		(0,3) (1,3) (2,3) (3,3) (4,3) (5,3)
+
+		(0,4) (1,4) (2,4) (3,4) (4,4) (5,4)
+
+		(0,5) (1,5) (2,5) (3,5) (4,5) (5,5)
+
+		With starting point (2,3)
+		Chain size is 1
+		Direction is 0, or UP
+
+		for the size of chain
+			-check that many cards in that direction
+			-then change direction
+			-check that many cards again in the new direction
+			-then change direction again, and increase chain size
+
+		so chain is 1
+			check 1 card in the up direction (2,2)
+			change direciton to right
+			check one card in the right direction (3,2)
+			change direction to down
+			increase chain size to 2
+
+		chain is 2
+			check 2 cards in the down direction (3,3) (3,4)
+			change direciton to left
+			check 2 cards in the left direction (2,4) (1,4)
+			change direction to up
+			increase chain size to 3
+
+		etc
+
+
+		*/
+
+		// for each ship group
 		for(var j = 0; j < shipGroups.length; ++j) {
 
+			// scatter if needed
 			if(shipGroups[j].num >= 6) {
 
+				// remove the ships from the tile
 				this.removeShipsFromTile(shipGroups[j].x, shipGroups[j].y);
+
+				// scatter amount
 				var shipsToScatter = shipGroups[j].num - 2;
 
-			    var direction = 0; // direction
-			    var size = 1; // chain size
+				// direction
+			    var direction = 0;
 
-			    // starting point
+			    // chain size
+			    var size = 1;
+
+			    // starting point is the shipGroup's tile
 			    var x = shipGroups[j].x;
 			    var y = shipGroups[j].y;
 
 			    console.log(`Need to scatter ${shipsToScatter} ships`);
 
-			    for (var k = 0; k < shipsToScatter; /*condition is inside loop*/) {
+			    // this gets tricky... for the num of ships to scatter
+			    for (var k = shipsToScatter; k > 0; /*condition is inside loop*/) {
 
-			        for (var l = 0; l < 2; l++) {
+			    	// for chain size
+			        for (var l = 0; l < 2 && k > 0; l++) {
 
-			            for (var i = 0; i < size; i++) {
+			        	// repeat the check and change direction
+			            for (var i = 0; i < size && k > 0; i++) {
 
 			                console.log(`Checking tile ( ${x}, ${y} )\n`);
+
+			                // check if there's a card available
 			                if(this.cardAtTile(x, y)) {
-			                	console.log(`Scattering one ship to ( ${x}, ${y} ) - ${k + 1} ships scattered...\n`);
+
+			                	// place a ship if so
+			                	console.log(`Scattering one ship to ( ${x}, ${y} ) - ${k - 1} ships left to scatter...\n`);
 			                	this.ships.push({ "x" : x, "y" : y });
-			                	k++;
+
+			                	// decrement the ships
+			                	--k;
 			                }
 			                else {
 			                	console.log(`No Card at tile ( ${x}, ${y} )\n`);
 			                }
 
+			                // move in the current direction
 			                switch (direction) {
 
+			                	// up
 			                    case 0: 
 			                    	y--; 
 			                    	break;
 
+			                    // right
 			                    case 1: 
 			                    	x++; 
 			                    	break;
 
+			                    // down
 			                    case 2: 
 				                    y++;
 				                    break;
 
+				                // left
 			                    case 3: 
 			                    	x--; 
 			                    	break;
 			                }
 			            }
 
+			            // change the direction, reset back to 0 if at 3
 			            direction = (direction + 1) % 4;
 			        }
 
+			        // increase the chain size
 			        size++;
 			    }
 			}
